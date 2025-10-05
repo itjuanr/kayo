@@ -8,6 +8,7 @@ const {
     ComponentType
 } = require('discord.js');
 const warningSystem = require('../utils/warningSystem');
+const { logAction } = require('../utils/logger');
 
 // Container mostrando todos os warnings do servidor
 function buildServerWarningsContainer(guildId) {
@@ -89,11 +90,19 @@ module.exports = {
         } else if (sub === 'limpar') {
             const user = interaction.options.getUser('usuário');
             warningSystem.resetWarnings(guildId, user.id);
+
             await interaction.reply({
                 components: [new ContainerBuilder().addTextDisplayComponents(text =>
                     text.setContent(`<:ActionCheck:1411491648516522104> Todos os warnings de ${user.tag} foram removidos.`)
                 )],
                 flags: MessageFlags.IsComponentsV2
+            });
+
+            logAction(interaction.client, {
+                action: 'Unwarn',
+                moderator: interaction.user,
+                target: user,
+                reason: 'Remoção de todos os warnings do usuário'
             });
 
         } else if (sub === 'limpar_todos') {
@@ -103,9 +112,7 @@ module.exports = {
                 fetchReply: true
             });
 
-            const collector = response.createMessageComponentCollector({
-                componentType: ComponentType.Button
-            });
+            const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button });
 
             collector.on('collect', async i => {
                 if (i.user.id !== interaction.user.id) {
@@ -121,6 +128,13 @@ module.exports = {
                         components: [],
                         content: '<:ActionCheck:1411491648516522104> Todos os warnings do servidor foram removidos.'
                     });
+
+                    logAction(interaction.client, {
+                        action: 'Clear',
+                        moderator: interaction.user,
+                        reason: 'Remoção de todos os warnings do servidor'
+                    });
+
                 } else if (i.customId === 'cancel_clear_all') {
                     await i.update({
                         components: [],

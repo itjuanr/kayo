@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { logAction } = require("../utils/logger");
+
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -32,6 +34,14 @@ module.exports = {
 
             await member.ban({ reason });
             await interaction.reply(`✅ **${user.tag}** foi banido. Motivo: ${reason}`);
+
+            logAction(interaction.client, {
+                action: "Banimento",
+                moderator: interaction.user,
+                target: user,
+                reason
+            });
+
         } catch (err) {
             console.error(err);
             await interaction.reply({

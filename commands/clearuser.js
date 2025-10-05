@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { logAction } = require('../utils/logger');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -41,6 +42,14 @@ module.exports = {
             await interaction.editReply({
                 content: `✅ ${userMessages.size} mensagens de **${targetUser.tag}** foram deletadas.`
             });
+
+            logAction(interaction.client, {
+                action: "Clear",
+                moderator: interaction.user,
+                target: targetUser,
+                reason: `${userMessages.size} mensagens deletadas no canal #${interaction.channel.name}`
+            });
+
         } catch (err) {
             console.error(err);
             await interaction.editReply({

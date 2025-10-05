@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { logAction } = require('../utils/logger');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,12 +18,20 @@ module.exports = {
 
         try {
             await interaction.deferReply({ ephemeral: true });
-            
+
             const deleted = await interaction.channel.bulkDelete(amount, true);
-            
+
             await interaction.editReply({
                 content: `✅ ${deleted.size} mensagens foram deletadas.`
             });
+
+            logAction(interaction.client, {
+                action: "Clear",
+                moderator: interaction.user,
+                target: null,
+                reason: `${deleted.size} mensagens deletadas no canal #${interaction.channel.name}`
+            });
+
         } catch (err) {
             console.error(err);
             await interaction.editReply({

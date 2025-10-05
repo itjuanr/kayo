@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { logAction } = require('../utils/logger');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -57,6 +58,13 @@ module.exports = {
 
             await member.timeout(timeoutDuration, reason);
             await interaction.reply(`✅ **${user.tag}** foi punido por ${timeString}. Motivo: ${reason}`);
+
+            logAction(interaction.client, {
+    action: "Timeout",
+    moderator: interaction.user,
+    target: user,
+    reason: `Punido por ${timeString}. Motivo: ${reason}`
+});
         } catch (err) {
             console.error(err);
             await interaction.reply({

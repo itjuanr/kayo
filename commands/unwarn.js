@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const warningSystem = require('../utils/warningSystem');
+const { logAction } = require('../utils/logger');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -26,6 +27,7 @@ module.exports = {
         if (!user) return interaction.reply({ content: 'Usuário não encontrado.', flags: [MessageFlags.Ephemeral] });
         if (warnings.length === 0) return interaction.reply({ content: 'Este usuário não possui warnings.', flags: [MessageFlags.Ephemeral] });
 
+        let removedWarning;
         if (indice) {
             if (indice < 1 || indice > warnings.length) {
                 return interaction.reply({ content: 'Índice inválido.', flags: [MessageFlags.Ephemeral] });
@@ -41,5 +43,11 @@ module.exports = {
         require('../utils/warningSystem').saveWarnings(allWarnings);
 
         await interaction.reply({ content: `Warning removido de ${user.tag} com sucesso!`, flags: [MessageFlags.Ephemeral] });
+        logAction(interaction.client, {
+            action: 'Unwarn',
+            moderator: interaction.user,
+            target: user,
+            reason: removedWarning?.reason || 'Sem motivo'
+        });
     }
 };
